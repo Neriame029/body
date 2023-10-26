@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-import time
+import socket
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -67,6 +67,17 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             hand[1] = 1000
 
         print(hand[0], hand[1])
+
+        # UDPで送信
+        host = "localhost"
+        port = 5000
+
+        # データを指定のフォーマットに整形(コンマ区切り)
+        data = f"{hand[0]},{hand[1]}"
+
+        # UDPソケットを作成
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.sendto(data.encode("utf-8"), (host, port))
 
         cv2.imshow("MediaPipe Pose", image)
         key = cv2.waitKey(5)
