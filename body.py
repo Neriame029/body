@@ -10,20 +10,29 @@ mp_pose = mp.solutions.pose
 cap = cv2.VideoCapture(0)
 
 results_handList = [0] * 2
-tmp= [0] * 2
+coordinate_tmp= [0] * 2
+finish_flag =0
+
+
+##リサイズ調整
+roi_left = 100      ##左から何ピクセルから写すか
+roi_top = 100       ##上から何ピクセルか
+roi_width = 300     ##横幅の切り取り
+roi_height = 300    ##縦幅の切り取り    
 
 def adjust(handList):
-    results_handList[0] = handList[0]+tmp[0]
-    results_handList[1] = handList[1]+tmp[1]
+    results_handList[0] = handList[0]+coordinate_tmp[0]
+    results_handList[1] = handList[1]+coordinate_tmp[1]
     print("sucsess")
-    tmp[0]=results_handList[0]
-    tmp[1]=results_handList[1]
+    coordinate_tmp[0]=results_handList[0]
+    coordinate_tmp[1]=results_handList[1]
 
     return results_handList
 
 def detect():
     global results_hand
     results_hand = [0] * 2
+    global finish_flag
     global hand
     hand = [0] * 2  #left_hand
 
@@ -40,6 +49,8 @@ def detect():
             if not success:
                 print("Ignoring empty camera frame.")
                 continue
+
+            image = image[roi_top:roi_top + roi_height, roi_left:roi_left + roi_width]
 
             # 後でセルフィービューで表示するために、画像を水平に反転させる。
             image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
@@ -58,7 +69,7 @@ def detect():
                 hand[0]= int(xhand*100-results_hand[0])
                 hand[1]= int((yhand*-1)*100-results_hand[1])
 
-                cv2.circle(image, (int(xhand*width),int(yhand*height)), 5, (255, 255, 255), thickness=-1, lineType=cv2.LINE_8, shift=0)
+                cv2.circle(image, (int(xhand*roi_width),int(yhand*roi_height)), 5, (255, 255, 255), thickness=-1, lineType=cv2.LINE_8, shift=0)
             else :
                 hand[0]=1000
                 hand[1]=1000
@@ -80,10 +91,13 @@ def detect():
 
             if key & 0xFF == 27:##Esc
                 break
+            if finish_flag == 1:
+                break
 
         cap.release()
 
 def listen():
+    global finish_flag
     global results_hand
     host = "localhost"
     port = 5001
@@ -100,6 +114,7 @@ def listen():
                 if data == "reset":
                     results_hand = adjust(hand)
                 if data == "finish":
+                    finish_flag=1
                     break
         except KeyboardInterrupt:
             print("Server terminated by user.")
