@@ -1,0 +1,16 @@
+# Define the path to your Python script
+$scriptPath = "C:\path\to\your_script.py"
+
+# Define the time and frequency at which the task should run
+$taskTrigger = New-ScheduledTaskTrigger -AtStartup
+
+# Create the action that runs the Python script
+$action = New-ScheduledTaskAction -Execute 'python' -Argument $scriptPath
+
+# Register the scheduled task
+Register-ScheduledTask -Action $action -Trigger $taskTrigger -TaskName "MyPythonScriptTask" -User "YOUR_USERNAME" -Password "YOUR_PASSWORD" -RunLevel Highest
+
+scriptPath： Pythonスクリプトのフルパスを設定します。
+YOUR_USERNAME： Windowsのユーザー名に置き換えます。
+YOUR_PASSWORD：これをWindowsパスワードに置き換える。
+PowerShellスクリプトを実行すると、"MyPythonScriptTask "という名前のスケジュールタスクが作成されます。このタスクは起動時にPythonスクリプトを実行します。
