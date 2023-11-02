@@ -5,13 +5,12 @@ import threading
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
+
 # For webcam input:
 cap = cv2.VideoCapture(0)
 
-exit = False
 results_handList = [0] * 2
 tmp= [0] * 2
-
 
 def adjust(handList):
     results_handList[0] = handList[0]+tmp[0]
@@ -19,6 +18,7 @@ def adjust(handList):
     print("sucsess")
     tmp[0]=results_handList[0]
     tmp[1]=results_handList[1]
+
     return results_handList
 
 def detect():
@@ -63,9 +63,6 @@ def detect():
                 hand[0]=1000
                 hand[1]=1000
 
-            
-            ##print(hand[0],hand[1])    
-
             # UDPで送信
             host = "localhost"
             port = 5000
@@ -80,11 +77,8 @@ def detect():
             cv2.imshow('MediaPipe Pose', image)
 
             key = cv2.waitKey(5)
-            # if key & 0xFF == ord('r') :
-            #         results_hand=adjust(hand)
 
             if key & 0xFF == 27:##Esc
-                exit = True
                 break
 
         cap.release()
@@ -105,9 +99,8 @@ def listen():
                 print(data)
                 if data == "reset":
                     results_hand = adjust(hand)
-                if exit:
+                if data == "finish":
                     break
-                
         except KeyboardInterrupt:
             print("Server terminated by user.")
 
